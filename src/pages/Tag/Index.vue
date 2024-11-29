@@ -1,0 +1,238 @@
+<template>
+  <div>
+    <VRow>
+      <VCol cols="12">
+        <ElCard class="data-table-wrapper">
+          <template #header>
+            <MvCardHeader>
+              <VBtn
+                color="primary"
+                variant="tonal"
+                @click="handleShowCreateForm"
+              >
+                <ElIcon
+                  class="mr-2"
+                  :size="14"
+                >
+                  <Plus />
+                </ElIcon>
+                Add Tag
+              </VBtn>
+            </MvCardHeader>
+          </template>
+            
+          <MvDataTable
+            v-if="state.users.length"
+            :columns="columns"
+            :data="state.users"
+          >
+            <template #roles="{ row }"> 
+              <span
+                v-for="(role, index) in row.roles"
+                :key="index"
+              > 
+                <ElTag
+                  type="primary"
+                  size="small"
+                > 
+                  {{ role.name }} 
+                </ElTag> 
+                <span v-if="index < row.roles.length - 1">, </span> 
+              </span>
+            </template>
+            <template #actions="{ row }">
+              <VBtn
+                class="mr-2"
+                type="reset"
+                size="small"
+                color="primary"
+                variant="tonal"
+                @click="handleAction('update', row)"
+              >
+                <ElIcon :size="14">
+                  <Edit />
+                </ElIcon>
+              </VBtn>
+
+              <VBtn
+                v-if="authUser?.id !== row.id"
+                type="reset"
+                size="small"
+                color="error"
+                variant="tonal"
+                @click="handleAction('delete', row)"
+              >
+                <ElIcon :size="14">
+                  <Delete />
+                </ElIcon>
+              </VBtn>
+            </template>
+          </MvDataTable>
+
+          <template
+            v-if="state.users.length"
+            #footer
+          >
+            <Pagination
+              :hide-on-single="false"
+              class="data-table-pagination"
+              background
+              :pagination="state.paginate"
+              @fetch="fetchUsers"
+            />
+          </template>
+        </ElCard>
+      </VCol>
+    </VRow>
+  </div>
+
+  <TagCreateUpdateForm
+    v-model="state.showCreateUpdateForm"
+    :item="state.selectedItem"
+    :roles="roles"
+    :on-action="handleActionUpdated"
+    @close="handleActionClose"
+  />
+</template>
+
+<script setup>
+import { computed, reactive, onMounted } from 'vue'
+import { Edit, Delete, Plus } from "@element-plus/icons-vue"
+import { useStore } from "vuex"
+import { authUser, formatDate } from "@core/utils/helpers"
+import { useNotify, useMixin } from "@core/composable/composable"
+import TagCreateUpdateForm from "@/pages/Tag/Action/TagCreateOrUpdateForm.vue"
+import Pagination from "@/components/Pagination.vue"
+
+const store = useStore()
+const { notify } = useNotify()
+
+const { formatNumber, handleError, confirmAndDelete } = useMixin()
+
+const pagination = computed(() => store.getters["user/getPagination"])
+
+const state = reactive({
+  users: computed(() => store.getters["user/getUsers"]),
+  loading: computed(() => store.getters["user/isLoading"]),
+
+  paginate: {
+    total: 0,
+    current_page: 1,
+    per_page: 10,
+    from: 0,
+    to: 0,
+  },
+
+  showCreateUpdateForm: false,
+  selectedItem: {},
+})
+
+const columns = [
+  {
+    prop: 'created_at',
+    label: 'Date',
+    formatter: row => formatDate(row),
+  },
+  {
+    prop: 'name',
+    label: 'Name',
+  },
+  {
+    prop: 'email',
+    label: 'Email',
+  },
+  {
+    prop: 'roles',
+    label: 'Role',
+  },
+  {
+    prop: 'actions',
+    label: 'Actions',
+  },
+]
+
+const roles = computed(() => {
+
+  let roles = store.getters["role/allRoles"]
+
+  if (!roles.length) return
+
+  return roles.map(role => ({
+    label: role.name,
+    id: role.id,
+  }))
+
+})
+
+const handleShowCreateForm = () => {
+  state.showCreateUpdateForm = true
+  state.selectedItem = {}
+}
+
+const handleActionClose = () => {
+  state.showCreateUpdateForm = false
+  state.selectedItem = {}
+}
+
+const handleUpdate = item => {
+  state.selectedItem = item
+  state.showCreateUpdateForm = true
+}
+
+const populatePaginate = () => {
+  state.paginate = {
+    total: pagination.value.total,
+    current_page: pagination.value.current_page,
+    per_page: pagination.value.per_page,
+    from: pagination.value.from,
+    to: pagination.value.to,
+  }
+}
+
+const fetchUsers = async () => {
+  await store.dispatch('user/fetchUserData', {
+    page: state.paginate.current_page,
+    per_page: state.paginate.per_page,
+  })
+  populatePaginate()
+}
+
+const fetchRoles = async () => {
+  await store.dispatch('role/fetchAllRoles')
+}
+
+const handleDelete = async item => {
+  await store.dispatch('user/deleteUser', item.id)
+    .then(response => {
+      notify.success(response.message || 'User deleted successfully')
+      fetchUsers()
+    })
+    .catch(handleError)
+}
+
+const handleAction = (action, item) => {
+
+  if (!['update', 'delete'].includes(action)) {
+    return
+  }
+
+  if (action === 'update') {
+    return handleUpdate(item)
+  }
+
+
+  return confirmAndDelete({ confirmCallback: () => handleDelete(item) })
+}
+
+const handleActionUpdated = () => {
+  state.showCreateUpdateForm = false
+  fetchUsers()
+}
+
+const mounted = async () => {
+  await fetchUsers()
+  await fetchRoles()
+}
+
+onMounted(mounted)
+</script>
