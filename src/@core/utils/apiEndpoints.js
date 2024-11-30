@@ -2,12 +2,6 @@ export const LOGIN_URL = '/auth/login'
 export const REGISTER_URL = '/auth/register'
 export const LOGOUT_URL = '/auth/logout'
 
-export const BRAND_ALL = '/admin/brands/all'
-export const BRAND_LIST = '/admin/brands'
-export const BRAND_STORE = '/admin/brands'
-export const BRAND_UPDATE = '/admin/brands'
-export const BRAND_DELETE = '/admin/brands'
-
 export const AUTH_USER = '/user'
 
 export const USER_LIST = '/admin/acl/users'
@@ -26,3 +20,9 @@ export const PERMISSION_LIST = '/admin/acl/permissions'
 export const PERMISSION_STORE = '/admin/acl/permissions'
 export const PERMISSION_UPDATE = '/admin/acl/permissions'
 export const PERMISSION_DELETE = '/admin/acl/permissions'
+
+
+export const CUSTOMER_ALL = '/admin/acl/permissions/all'
+export const CUSTOMER_LIST = '/admin/customers'
+export const CUSTOMER_UPDATE = '/admin/acl/permissions'
+export const CUSTOMER_DELETE = '/admin/acl/permissions'

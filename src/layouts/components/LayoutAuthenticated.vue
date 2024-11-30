@@ -46,25 +46,26 @@
           heading: 'Customers',
         }"
       />
+        <VerticalNavLink
+        :item="{
+          title: 'All Customer',
+          icon: 'bx-cart',
+          to: '/all-customer',
+        }"
+      />
       <VerticalNavLink
         :item="{
           title: 'Bride',
           icon: 'bx-cart-add',
-          to: '/orders',
+          to: '/bride',
         }"
       />
-      <VerticalNavLink
-        :item="{
-          title: 'All Customer',
-          icon: 'bx-cart',
-          to: '/orders',
-        }"
-      />
+
       <VerticalNavLink
         :item="{
           title: 'Groom',
           icon: 'bx-window-close',
-          to: '/orders',
+          to: '/groom',
         }"
       />
         

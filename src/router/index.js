@@ -22,6 +22,33 @@ const router = createRouter({
           path: 'account-settings',
           component: () => import('../pages/account-settings.vue'),
         },
+        {
+          path: 'all-customer',
+          name: 'allCustomer',
+          component: () => import('../pages/Customer/Customer/Index.vue'),
+          meta: {
+            title: 'All Customers', // Adjusted to reflect plural form
+            auth: true,
+          },
+        },
+        {
+          path: 'bride',
+          name: 'bride',
+          component: () => import('../pages/Customer/Bride/Index.vue'),
+          meta: {
+            title: 'Bride', // Adjusted to reflect correct title for Bride page
+            auth: true,
+          },
+        },
+        {
+          path: 'groom',
+          name: 'groom',
+          component: () => import('../pages/Customer/Groom/Index.vue'),
+          meta: {
+            title: 'Groom', // Adjusted to reflect correct title for Groom page
+            auth: true,
+          },
+        },
 
 
 

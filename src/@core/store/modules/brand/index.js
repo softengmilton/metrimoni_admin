@@ -1,5 +1,5 @@
 import api from "@core/utils/api"
-import { BRAND_LIST, BRAND_STORE, BRAND_UPDATE, BRAND_DELETE, BRAND_ALL } from "@core/utils/apiEndpoints"
+// import { BRAND_LIST, BRAND_STORE, BRAND_UPDATE, BRAND_DELETE, BRAND_ALL } from "@core/utils/apiEndpoints"
 
 export default {
   namespaced: true,
