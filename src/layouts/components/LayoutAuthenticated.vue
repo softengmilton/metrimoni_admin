@@ -78,21 +78,21 @@
         :item="{
           title: 'New Payments',
           icon: 'bx-credit-card-front',
-          to: '/payments',
+          to: '/new-payments',
         }"
       />
       <VerticalNavLink
         :item="{
           title: 'All Payments',
           icon: 'bx-credit-card',
-          to: '/payments',
+          to: '/all-payments',
         }"
       />
       <VerticalNavLink
         :item="{
           title: 'Failed Payments',
           icon: 'bx-credit-card-front',
-          to: '/payments',
+          to: '/failed-payments',
         }"
       />
         

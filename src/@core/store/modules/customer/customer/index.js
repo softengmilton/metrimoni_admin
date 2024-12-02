@@ -1,11 +1,12 @@
 import api from "@core/utils/api"
-import {CUSTOMER_LIST} from '@core/utils/apiEndpoints'
+import {CUSTOMER_LIST,CUSTOMER_DETAILS, CUSTOMER_UPDATE, CUSTOMER_DELETE} from '@core/utils/apiEndpoints'
 export default {
   namespaced: true,
 
   state: {
     allCustomers: [],
-    customer: {},
+    customers: {},
+    customerDetails: {},
     pagination: {
       current_page: 1,
       last_page: 1,
@@ -19,19 +20,20 @@ export default {
   },
 
   getters: {
-    getCustomers: state => state.customer?.data || [],
+    getCustomers: state => state.customers?.data || [],
     allCustomers: state => state.allCustomers || [],
+    getCustomerDetails: state => state.customerDetails,
     getPagination: state => state.pagination,
     isLoading: state => state.loading,
   },
 
   mutations: {
     SET_CUSTOMERS(state, data) {
-      state.customer = data
+      state.customers = data
     },
-
+        
     SET_ALL_CUSTOMERS(state, data) {
-      state.allCities = data
+      state.allCustomers = data
     },
 
     SET_PAGINATION(state, data) {
@@ -40,6 +42,9 @@ export default {
 
     SET_LOADING(state, value) {
       state.loading = value
+    },
+    SET_CUSTOMER_DETAILS(state, data) {
+      state.customerDetails = data // Mutation to update customer details
     },
   },
 
@@ -70,6 +75,22 @@ export default {
         .finally(() => commit('SET_LOADING', false))
     },
 
+    async fetchDetails({ commit }, id) { // New action to fetch customer details
+      commit('SET_LOADING', true)
+       const url = CUSTOMER_DETAILS.replace(':id',id)
+      return await api
+        .get(url) // Use the correct endpoint and pass the ID
+        .then(({ data }) => {
+          commit('SET_CUSTOMER_DETAILS', data.customer) // Commit the details to the state
+          commit('SET_LOADING', false)
+        })
+        .catch(error => {
+          commit('SET_LOADING', false)
+          console.error("Failed to fetch customer details:", error)
+        })
+        .finally(() => commit('SET_LOADING', false))
+    },
+
     async fetchAllCustomers({ commit }) {
 
       return await api
@@ -91,7 +112,7 @@ export default {
 
       return new Promise((resolve, reject) => {
 
-        const url = CITY_UPDATE + `/${id}`
+        const url = CUSTOMER_UPDATE.replace(':id',id)
 
         api
           .put(url, data)
@@ -109,9 +130,9 @@ export default {
     async deleteCustomer({ commit }, id) {
 
       commit('SET_LOADING', true)
-
+      const url = CUSTOMER_DELETE.replace(':id',id)
       return await api
-        .delete(CITY_DELETE + `/${id}`)
+        .delete(url)
         .then(response => response)
         .catch(error => error)
         .finally(() => {})

@@ -24,5 +24,10 @@ export const PERMISSION_DELETE = '/admin/acl/permissions'
 
 export const CUSTOMER_ALL = '/admin/acl/permissions/all'
 export const CUSTOMER_LIST = '/admin/customers'
-export const CUSTOMER_UPDATE = '/admin/acl/permissions'
-export const CUSTOMER_DELETE = '/admin/acl/permissions'
+export const CUSTOMER_DETAILS = '/admin/customers/:id/details' ;
+export const CUSTOMER_UPDATE = '/admin/update-customer/:id'
+export const CUSTOMER_DELETE = '/admin/delete-customer/:id'
+
+export const SELECTOR_OPTION = '/portal/selector-option'
+export const GET_COUNCIL_DATA = '/portal/get-council/:region'
+

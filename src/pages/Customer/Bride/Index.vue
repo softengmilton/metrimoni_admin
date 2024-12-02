@@ -1,26 +1,38 @@
-<!-- <template>
+<template>
   <div>
     <VRow>
       <VCol cols="12">
         <ElCard class="data-table-wrapper">
           <template #header>
             <MvCardHeader>
-              <VBtn color="primary" variant="tonal" @click="handleShowCreateForm">
-                <ElIcon class="mr-2" :size="14">
-                  <Plus />
-                </ElIcon>
-                Add Bed Types
-              </VBtn>
+              <div class="ms-5 d-flex">
+                <!-- Search Input -->
+                <VTextField v-model="state.customerID" label="Search" outlined size="medium" @input="filterData"
+                  placeholder="Search by customer ID" class="mb-4" />
+                <!-- Search Icon Button -->
+                <VBtn icon="mdi-magnify" @click="fetchCustomer" variant="text" color="primary"
+                  class="search-icon-btn mt-1" />
+
+              </div>
             </MvCardHeader>
           </template>
-          <MvDataTable :columns="columns" :data="state.bedTypes">
-            <template #icon="{ row }">
-              <img :src="row.icon_url" alt="icon" width="50" height="50">
+          <MvDataTable :columns="columns" :data="state.customers">
+            <template #photo="{ row }">
+              <img :src="row.primary_image_url" alt="icon" width="50" height="50" class="profile-img">
             </template>
-            <template #country="{ row }">
-              {{ row?.country?.name }}
+            <template #info="{ row }">
+              <p><strong>Name:</strong>{{ row?.profile?.name }}</p>
+              <p><strong>Email:</strong>{{ row?.email }}</p>
+              <p><strong>Phone:</strong>{{ row?.phone }}</p>
             </template>
-
+            <template #personal="{ row }">
+              <p><strong>Citizenship:</strong>{{ row?.profile?.citizenship }}</p>
+              <p><strong>Education:</strong>{{ row?.profile?.education }}</p>
+              <p><strong>Profession:</strong>{{ row?.profile?.profession }}</p>
+            </template>
+            <template #status="{ row }">
+              <p>{{ row?.user_type }}</p>
+            </template>
             <template #actions="{ row }">
               <VBtn class="mr-2" type="reset" size="small" color="primary" variant="tonal"
                 @click="handleAction('update', row)">
@@ -37,17 +49,17 @@
             </template>
           </MvDataTable>
 
-          <template v-if="state.bedTypes.length" #footer>
+          <template v-if="state.customers.length" #footer>
             <Pagination :hide-on-single="false" class="data-table-pagination" background layout="prev, pager, next"
-              :pagination="state.paginate" @fetch="fetchBedType" />
+              :pagination="state.paginate" @fetch="fetchCustomer" />
           </template>
         </ElCard>
       </VCol>
     </VRow>
   </div>
 
-  <BedTypeCreateUpdateForm v-model="state.showCreateUpdateForm" :item="state.selectedItem"
-    :on-action="handleActionUpdated" @close="handleActionClose" />
+  <!-- <BedTypeCreateUpdateForm v-model="state.showCreateUpdateForm" :item="state.selectedItem"
+    :on-action="handleActionUpdated" @close="handleActionClose" /> -->
 </template>
 
 <script setup>
@@ -58,17 +70,21 @@ import MvDataTable from "@core/components/MvDataTable.vue"
 import MvCardHeader from "@core/components/MvCardHeader.vue"
 import { Delete, Edit, Plus } from "@element-plus/icons-vue"
 import { useMixin, useNotify } from "@core/composable/composable"
-import BedTypeCreateUpdateForm from "@/pages/Room/BedTypes/Action/BedTypeCreateUpdateForm.vue"
+
 import { formatDate } from "@core/utils/helpers"
+import { useRoute } from 'vue-router'
+import router from '@/router'
+
+const route = useRoute();
 
 const store = useStore()
 const { handleError, confirmAndDelete } = useMixin()
 const { notify } = useNotify()
 
-const pagination = computed(() => store.getters["bedTypes/getPagination"]) || [];
+const pagination = computed(() => store.getters["customer/getPagination"]) || [];
 
 const state = reactive({
-  bedTypes: '',
+  customers: computed(() => store.getters['customer/getCustomers']),
   loading: '',
 
   paginate: {
@@ -81,29 +97,38 @@ const state = reactive({
 
   showCreateUpdateForm: false,
   selectedItem: {},
+  selector: [],
+  regions: [],
+  councils: [],
+  customerID: '',
 })
 
 const columns = [
+  // {
+  //   label: 'Date',
+  //   prop: 'created_at',
+  //   formatter: value => formatDate(value),
+  // },
   {
-    label: 'Date',
-    prop: 'created_at',
-    formatter: value => formatDate(value),
+    label: 'Photo',
+    prop: 'photo',
   },
   {
-    label: 'Name',
-    prop: 'name',
+    label: 'Customer Id',
+    prop: 'customerId',
+  },
+
+  {
+    label: 'Info',
+    prop: 'info',
   },
   {
-    label: 'Capacity',
-    prop: 'capacity',
+    label: 'Personal Details',
+    prop: 'personal',
   },
   {
-    label: 'Total Bed',
-    prop: 'total_bed',
-  },
-  {
-    label: 'Bed Size',
-    prop: 'bed_size',
+    label: 'Status',
+    prop: 'status',
   },
   {
     fixed: "right",
@@ -123,9 +148,9 @@ const populatePaginate = pagination => {
 }
 
 const handleUpdate = item => {
-  state.selectedItem = item
-  state.showCreateUpdateForm = true
+  return router.push({ name: 'editCustomer', params: { id: item.id } });
 }
+
 
 const handleActionClose = () => {
   state.showCreateUpdateForm = false
@@ -137,19 +162,20 @@ const handleShowCreateForm = () => {
   state.selectedItem = {}
 }
 
-const fetchBedType = async () => {
-  await store.dispatch('bedTypes/fetchBedTypeData', {
+const fetchCustomer = async () => {
+  await store.dispatch('customer/fetchCustomerData', {
     page: state.paginate.current_page,
     per_page: state.paginate.per_page,
+    bride: 'bride',
   })
   populatePaginate(pagination.value)
 }
 
 const handleDelete = async item => {
-  await store.dispatch('bedTypes/deleteBedType', item.id)
+  await store.dispatch('customer/deleteCustomer', item.id)
     .then(response => {
       notify.success(response.message || 'Bed Type deleted successfully')
-      fetchBedType()
+      fetchCustomer()
     })
     .catch(handleError)
 }
@@ -170,16 +196,20 @@ const handleAction = (action, item) => {
 
 const handleActionUpdated = () => {
   state.showCreateUpdateForm = false
-  fetchBedType()
+  fetchCustomer()
 }
 
 const mounted = async () => {
-  await fetchBedType()
+  await fetchCustomer()
 }
 
 onMounted(mounted)
-</script> -->
+</script>
 
-<template>
-<h1>Bride</h1>
-</template>
+<style scoped>
+.profile-img {
+  width: 100px !important;
+  height: 100px !important;
+  border-radius: 10px;
+}
+</style>

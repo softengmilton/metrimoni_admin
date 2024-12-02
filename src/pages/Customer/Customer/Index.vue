@@ -5,18 +5,22 @@
         <ElCard class="data-table-wrapper">
           <template #header>
             <MvCardHeader>
-              <!-- <VBtn color="primary" variant="tonal" @click="handleShowCreateForm">
-                <ElIcon class="mr-2" :size="14">
-                  <Plus />
-                </ElIcon>
-                Add Bed Types
-              </VBtn> -->
+              <div class="ms-5 d-flex">
+                <!-- Search Input -->
+                <VTextField v-model="state.customerID" label="Search" outlined size="medium" @input="filterData"
+                  placeholder="Search by customer ID" class="mb-4" />
+                <!-- Search Icon Button -->
+                <VBtn icon="mdi-magnify" @click="fetchCustomer" variant="text"
+                  color="primary"
+                  class="search-icon-btn mt-1"
+                  />
 
+              </div>
             </MvCardHeader>
           </template>
           <MvDataTable :columns="columns" :data="state.customers">
             <template #photo="{ row }">
-              <img :src="row.primary_image_url" alt="icon" width="50" height="50">
+              <img :src="row.primary_image_url" alt="icon" width="50" height="50" class="profile-img">
             </template>
             <template #info="{ row }">
               <p><strong>Name:</strong>{{ row?.profile?.name }}</p>
@@ -49,7 +53,7 @@
 
           <template v-if="state.customers.length" #footer>
             <Pagination :hide-on-single="false" class="data-table-pagination" background layout="prev, pager, next"
-              :pagination="state.paginate" @fetch="fetchBedType" />
+              :pagination="state.paginate" @fetch="fetchCustomer" />
           </template>
         </ElCard>
       </VCol>
@@ -70,6 +74,10 @@ import { Delete, Edit, Plus } from "@element-plus/icons-vue"
 import { useMixin, useNotify } from "@core/composable/composable"
 
 import { formatDate } from "@core/utils/helpers"
+import { useRoute } from 'vue-router'
+import router from '@/router'
+
+const route = useRoute();
 
 const store = useStore()
 const { handleError, confirmAndDelete } = useMixin()
@@ -94,23 +102,8 @@ const state = reactive({
   selector: [],
   regions: [],
   councils: [],
+  customerID:'',
 })
-
-
-const form = reactive({
-  role: '',
-  age: '',
-  marital_status: '',
-  citizen: '',
-  region_id: '',
-  community_id: '',
-});
-
-
-// const state = reactive({
- 
-// });
-
 
 const columns = [
   // {
@@ -157,9 +150,9 @@ const populatePaginate = pagination => {
 }
 
 const handleUpdate = item => {
-  state.selectedItem = item
-  state.showCreateUpdateForm = true
+  return router.push({ name: 'editCustomer', params: { id: item.id } });
 }
+
 
 const handleActionClose = () => {
   state.showCreateUpdateForm = false
@@ -171,19 +164,20 @@ const handleShowCreateForm = () => {
   state.selectedItem = {}
 }
 
-const fetchBedType = async () => {
+const fetchCustomer = async () => {
   await store.dispatch('customer/fetchCustomerData', {
     page: state.paginate.current_page,
     per_page: state.paginate.per_page,
+    customerID: state.customerID || [],
   })
   populatePaginate(pagination.value)
 }
 
 const handleDelete = async item => {
-  await store.dispatch('customer/deleteBedType', item.id)
+  await store.dispatch('customer/deleteCustomer', item.id)
     .then(response => {
       notify.success(response.message || 'Bed Type deleted successfully')
-      fetchBedType()
+      fetchCustomer()
     })
     .catch(handleError)
 }
@@ -204,89 +198,21 @@ const handleAction = (action, item) => {
 
 const handleActionUpdated = () => {
   state.showCreateUpdateForm = false
-  fetchBedType()
+  fetchCustomer()
 }
 
 const mounted = async () => {
-  await fetchBedType()
+  await fetchCustomer()
 }
 
 onMounted(mounted)
 </script>
-<!-- 
+
 <style scoped>
-img {
-  border-radius: 5px;
-}
-/* Main container styles */
-.fil-mob-view {
-  margin-top: 100px;
-  position: fixed;
-  z-index: 1;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  overflow-x: auto;
-  padding: 40px 30px;
-  background-color: #fff;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  border-radius: 0px 0 0 0;
-  width: 100%;
-  transform: translateY(0);
-  opacity: 1;
-  display: none;
-  max-height: 90vh;
-}
 
-.fil-mob-view[style*="display: block"] {
-  display: block;
+.profile-img{
+  width: 100px !important;
+  height: 100px !important;
+  border-radius: 10px;
 }
-
-/* Flex container for filters */
-.filters-wrapper {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  gap: 20px;
-  /* Adds space between items */
-}
-
-/* Filter component styles */
-.filt-com {
-  flex: 1 1 calc(30% - 20px);
-  /* Adjust width and spacing */
-  min-width: 250px;
-  /* Ensures responsiveness */
-}
-
-.filter-clo {
-  font-size: 28px;
-  color: #333;
-  cursor: pointer;
-  position: absolute;
-  top: 10px;
-  right: 10px;
-}
-
-/* General form group and select styles */
-.form-group select {
-  background-color: #fafafa;
-  border-radius: 8px;
-  border: 1px solid #e0e0e0;
-  padding: 10px;
-}
-
-.filt-send-query a {
-  display: inline-block;
-  background-color: #007bff;
-  color: #fff;
-  padding: 10px 20px;
-  border-radius: 30px;
-  text-decoration: none;
-  transition: background-color 0.3s ease;
-}
-
-.filt-send-query a:hover {
-  background-color: #0056b3;
-}
-</style> -->
+</style>

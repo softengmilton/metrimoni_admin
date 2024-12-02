@@ -32,6 +32,15 @@ const router = createRouter({
           },
         },
         {
+          path: 'customer/:id/edit',
+          name: 'editCustomer',
+          component: () => import('../pages/Customer/CustomerEdit/Index.vue'),
+          meta: {
+            title: 'Edit', // Adjusted to reflect plural form
+            auth: true,
+          },
+        },
+        {
           path: 'bride',
           name: 'bride',
           component: () => import('../pages/Customer/Bride/Index.vue'),
@@ -49,6 +58,34 @@ const router = createRouter({
             auth: true,
           },
         },
+
+       {
+          path: 'new-payment',
+          name: 'newPayment',
+          component: () => import('../pages/Payment/NewPayment/Index.vue'),
+          meta: {
+            title: 'New Payment', // Correct title for the New Payment page
+            auth: true,
+          },
+        },
+        {
+          path: 'all-payment',
+          name: 'allPayment',
+          component: () => import('../pages/Payment/AllPayment/Index.vue'),
+          meta: {
+            title: 'All Payments', // Corrected title for the All Payments page
+            auth: true,
+          },
+        },
+        {
+          path: 'failed-payment',
+          name: 'failedPayment',
+          component: () => import('../pages/Payment/PendingPayment/Index.vue'), // Changed to FailedPayment to match route name
+          meta: {
+            title: 'Failed Payments', // Corrected title for the Failed Payments page
+            // auth: true,
+          },
+        }
 
 
 
